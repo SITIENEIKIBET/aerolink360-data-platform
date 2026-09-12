@@ -180,3 +180,28 @@ safe to commit as-is, since they contain real database credentials.
 kafka/*-connector.example.json templates (password placeholder) are
 committed instead, matching the .env.example pattern used throughout
 this project.
+
+
+## ADR-007: Per-Table Topic Naming (Debezium Default) Over Per-Event-Type
+
+**Context:** Debezium's default topic naming is
+{topic.prefix}.{schema}.{table} (e.g. aaa.reservations.public.bookings).
+An alternative convention groups by business event type instead
+(aaa.bookings, aaa.payments) using Debezium's ByLogicalTableRouter
+transform.
+
+**Decision:** Keep Debezium's per-table default. 17 topics currently
+exist, each traceable 1:1 to a source table, verified against Phase 2's
+known row counts (e.g. aaa.reservations.public.bookings = 501 messages,
+exactly matching the 500-row snapshot + 1 live UPDATE proven in Phase 3).
+
+**Alternatives considered:** ByLogicalTableRouter transform, consolidating
+multiple tables into fewer business-event topics — rejected for now since
+it requires reconfiguring 4 already-verified-working connectors for a
+naming preference with no functional benefit at current scale; genuinely
+worth revisiting if a consumer needed to subscribe to "all payment
+activity" as one stream spanning tables.
+
+**Consequences:** Consumers (Spark Structured Streaming in Phase 5) will
+subscribe per-table, or use a topic pattern/regex to consume multiple
+related topics from one domain at once (e.g. `aaa.reservations.*`).
