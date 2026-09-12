@@ -1,0 +1,16 @@
+{
+  "name": "aaa-reservations-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres-reservations",
+    "database.port": "5432",
+    "database.user": "aaa_admin",
+    "database.password": "AeroLink@2026!",
+    "database.dbname": "reservations",
+    "topic.prefix": "aaa.reservations",
+    "table.include.list": "public.bookings,public.booking_items,public.payments,public.tickets,public.cancellations,public.refunds",
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium_reservations_slot",
+    "publication.autocreate.mode": "filtered"
+  }
+}
