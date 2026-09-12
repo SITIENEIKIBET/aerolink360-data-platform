@@ -1,0 +1,36 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Spark / Delta / Databricks
+spark-warehouse/
+*.log
+.ipynb_checkpoints/
+
+# Kafka / Docker volumes
+kafka-data/
+zookeeper-data/
+
+# dbt
+dbt/*/target/
+dbt/*/logs/
+dbt/*/dbt_packages/
+
+# Airflow
+airflow/logs/
+airflow/*.db
+
+# Data (regenerable, not committed)
+data/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
