@@ -1,0 +1,78 @@
+services:
+  postgres-reservations:
+    image: postgres:16
+    container_name: aaa-postgres-reservations
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aaa_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: reservations
+    ports:
+      - "5433:5432"
+    volumes:
+      - aaa_reservations_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aaa_admin -d reservations"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-flightops:
+    image: postgres:16
+    container_name: aaa-postgres-flightops
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aaa_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: flightops
+    ports:
+      - "5434:5432"
+    volumes:
+      - aaa_flightops_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aaa_admin -d flightops"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-maintenance:
+    image: postgres:16
+    container_name: aaa-postgres-maintenance
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aaa_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: maintenance
+    ports:
+      - "5435:5432"
+    volumes:
+      - aaa_maintenance_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aaa_admin -d maintenance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-loyalty:
+    image: postgres:16
+    container_name: aaa-postgres-loyalty
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aaa_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: loyalty
+    ports:
+      - "5436:5432"
+    volumes:
+      - aaa_loyalty_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aaa_admin -d loyalty"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  aaa_reservations_data:
+  aaa_flightops_data:
+  aaa_maintenance_data:
+  aaa_loyalty_data:
