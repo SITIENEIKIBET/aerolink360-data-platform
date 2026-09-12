@@ -140,3 +140,43 @@ explicit "how this scales to millions" note, so the architectural
 
 reasoning is provable even without processing literal millions of rows.
 
+
+## ADR-006: Hardcoded Connector Passwords (Known Shortcut, Documented)
+
+**Context:** Debezium connector configs are registered via Kafka Connect's
+REST API as JSON, which does not read .env files. All four connector
+configs (kafka/*.json) contain the Postgres password in plaintext.
+
+**Decision:** Accept this as a documented, temporary shortcut for local
+development rather than solving it prematurely with infrastructure we
+don't yet need.
+
+**Production-correct alternatives (not implemented here):**
+- Kafka Connect's built-in ConfigProvider mechanism (e.g. FileConfigProvider
+  or EnvVarConfigProvider) to inject secrets at runtime without embedding
+  them in the connector JSON.
+- HashiCorp Vault or Azure Key Vault integration for genuine secrets
+  management.
+
+**Trade-offs:** kafka/*.json files must never be treated as safe to make
+public as-is; they are gitignored... [continued below]
+
+**Consequences:** kafka/*.json is added to .gitignore. A sanitized
+kafka/*.example.json template (password placeholder) is committed instead,
+matching the .env.example pattern used throughout this project.
+
+**Trade-offs:** kafka/*.json connector files must never be treated as
+safe to commit as-is, since they contain real database credentials.
+
+**Consequences:** kafka/*-connector.json is gitignored. Sanitized
+kafka/*-connector.example.json templates (password placeholder) are
+committed instead, matching the .env.example pattern used throughout
+this project.
+
+**Trade-offs:** kafka/*.json connector files must never be treated as
+safe to commit as-is, since they contain real database credentials.
+
+**Consequences:** kafka/*-connector.json is gitignored. Sanitized
+kafka/*-connector.example.json templates (password placeholder) are
+committed instead, matching the .env.example pattern used throughout
+this project.

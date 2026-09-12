@@ -1,0 +1,16 @@
+﻿{
+  "name": "aaa-maintenance-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres-maintenance",
+    "database.port": "5432",
+    "database.user": "aaa_admin",
+    "database.password": "your_password_here",
+    "database.dbname": "maintenance",
+    "topic.prefix": "aaa.maintenance",
+    "table.include.list": "public.aircraft,public.maintenance_events,public.defects,public.maintenance_costs",
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium_maintenance_slot",
+    "publication.autocreate.mode": "filtered"
+  }
+}

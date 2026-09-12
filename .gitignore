@@ -34,3 +34,4 @@ data/
 Thumbs.db
 .vscode/
 .idea/
+kafka/*-connector.json
