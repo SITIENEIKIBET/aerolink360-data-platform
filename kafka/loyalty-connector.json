@@ -1,0 +1,16 @@
+{
+  "name": "aaa-loyalty-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres-loyalty",
+    "database.port": "5432",
+    "database.user": "aaa_admin",
+    "database.password": "AeroLink@2026!",
+    "database.dbname": "loyalty",
+    "topic.prefix": "aaa.loyalty",
+    "table.include.list": "public.loyalty_accounts,public.loyalty_transactions",
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium_loyalty_slot",
+    "publication.autocreate.mode": "filtered"
+  }
+}

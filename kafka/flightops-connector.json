@@ -1,0 +1,16 @@
+{
+  "name": "aaa-flightops-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres-flightops",
+    "database.port": "5432",
+    "database.user": "aaa_admin",
+    "database.password": "AeroLink@2026!",
+    "database.dbname": "flightops",
+    "topic.prefix": "aaa.flightops",
+    "table.include.list": "public.flights,public.flight_events,public.delays,public.diversions,public.cancellations,public.gates",
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium_flightops_slot",
+    "publication.autocreate.mode": "filtered"
+  }
+}
