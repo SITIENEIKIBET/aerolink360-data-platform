@@ -205,3 +205,49 @@ activity" as one stream spanning tables.
 **Consequences:** Consumers (Spark Structured Streaming in Phase 5) will
 subscribe per-table, or use a topic pattern/regex to consume multiple
 related topics from one domain at once (e.g. `aaa.reservations.*`).
+
+
+## ADR-008: Local PySpark Structured Streaming Instead of Databricks Community Edition
+
+**Context:** ADR-003 selected Databricks Community Edition for Spark
+workloads. However, Databricks CE runs entirely in Databricks' cloud and
+cannot reach a Kafka broker running locally in Docker, short of exposing
+it publicly (rejected per the same reasoning as ADR-003 in the retail
+project - no unnecessary security exposure).
+
+**Decision:** Run Spark Structured Streaming locally via pip-installed
+PySpark, connecting directly to Kafka's already-configured
+PLAINTEXT_HOST listener on localhost:29092.
+
+**Alternatives considered:**
+- Exposing local Kafka via ngrok/tunnel for Databricks CE access:
+  rejected - unnecessary security exposure for no functional gain.
+- Databricks CE for downstream (non-streaming) analytical work only:
+  deferred - not needed given Fabric already serves as the
+  "enterprise cloud platform" demonstration per ADR-004.
+
+**Consequences:** The technical substance (Structured Streaming API,
+checkpointing, watermarking, windowed aggregations) is identical whether
+running locally or on Databricks - only the driver's execution location
+changes. Databricks Community Edition is not used in this project;
+Fabric fulfills the "cloud platform" demonstration role instead.
+
+
+## ADR-009: Persistent Volume Required for Kafka (Lesson Learned)
+
+**Context:** Unlike the four Postgres services, the original Kafka
+service definition had no persistent volume. When the Kafka container
+was recreated (during a port-mapping fix), all 17 topics and their CDC
+history were silently wiped, since KRaft mode stores broker data inside
+the container's writable layer by default.
+
+**Decision:** Added a named volume (aaa_kafka_data) mounted at
+/var/lib/kafka/data, matching the pattern already used for all four
+Postgres services.
+
+**Consequences:** All four Debezium connectors were re-registered
+(triggering fresh snapshots) after this fix. Container recreation for
+config changes (e.g. adding a port mapping) is now safe going forward -
+this is the same lesson Postgres already had baked in from Phase 2, and
+should have been applied to every stateful service from the start, not
+just databases.

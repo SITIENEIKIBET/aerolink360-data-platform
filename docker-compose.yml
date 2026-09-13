@@ -81,6 +81,9 @@
     restart: unless-stopped
     ports:
       - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - aaa_kafka_data:/var/lib/kafka/data
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -130,3 +133,4 @@ volumes:
   aaa_flightops_data:
   aaa_maintenance_data:
   aaa_loyalty_data:
+  aaa_kafka_data:
