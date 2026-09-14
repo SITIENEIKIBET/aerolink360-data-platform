@@ -67,6 +67,7 @@ def main():
             F.col("kafka_timestamp"),
         )
         .withWatermark("kafka_timestamp", "10 minutes")
+        .withColumn("_source_system", F.lit("maintenance")) 
         .dropDuplicates(["aircraft_registration"])
     )
 

@@ -105,6 +105,7 @@ def main():
         # This is the concrete implementation of the "handle duplicate
         # events" requirement.
         .withWatermark("kafka_timestamp", "10 minutes")
+        .withColumn("_source_system", F.lit("reservations"))
         .dropDuplicates(["booking_id"])
     )
 
