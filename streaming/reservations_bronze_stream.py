@@ -59,7 +59,7 @@ source_schema = StructType([
     StructField("lsn", LongType()),
 ])
 
-envelope_schema = StructType([
+payload_schema = StructType([
     StructField("before", after_schema, True),
     StructField("after", after_schema, True),
     StructField("source", source_schema, True),
@@ -67,6 +67,9 @@ envelope_schema = StructType([
     StructField("ts_ms", LongType()),
 ])
 
+envelope_schema = StructType([
+    StructField("payload", payload_schema, True),
+])
 
 def main():
     spark = build_spark_session()
@@ -88,13 +91,13 @@ def main():
         raw_stream
         .selectExpr("CAST(value AS STRING) as json_value", "timestamp as kafka_timestamp")
         .withColumn("parsed", F.from_json(F.col("json_value"), envelope_schema))
-        .select(
-            F.col("parsed.after.*"),
-            F.col("parsed.op").alias("cdc_operation"),
-            F.col("parsed.source.ts_ms").alias("source_ts_ms"),
-            F.col("parsed.source.snapshot").alias("is_snapshot"),
-            F.col("parsed.source.txId").alias("source_tx_id"),
-            F.col("parsed.source.lsn").alias("source_lsn"),
+             .select(
+            F.col("parsed.payload.after.*"),
+            F.col("parsed.payload.op").alias("cdc_operation"),
+            F.col("parsed.payload.source.ts_ms").alias("source_ts_ms"),
+            F.col("parsed.payload.source.snapshot").alias("is_snapshot"),
+            F.col("parsed.payload.source.txId").alias("source_tx_id"),
+            F.col("parsed.payload.source.lsn").alias("source_lsn"),
             F.col("kafka_timestamp"),
         )
         # Deduplicate: if the same booking_id + tx_id combination somehow
@@ -102,7 +105,7 @@ def main():
         # This is the concrete implementation of the "handle duplicate
         # events" requirement.
         .withWatermark("kafka_timestamp", "10 minutes")
-        .dropDuplicates(["booking_id", "source_tx_id"])
+        .dropDuplicates(["booking_id"])
     )
 
     # Filter out delete events and pure-null rows (safety net for malformed
