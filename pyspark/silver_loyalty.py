@@ -60,3 +60,24 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+## ADR-012: Reference/Master Data Loaded via Batch JDBC, Not CDC
+
+**Context:** Debezium connectors (Phase 3) were deliberately scoped to
+transactional tables only (bookings, flights, aircraft state,
+loyalty_transactions), excluding slower-changing reference tables
+(customers, airports, fare_classes, aircraft_models, schedules).
+
+**Decision:** Gold dimensions sourced from reference tables are loaded
+via direct batch JDBC reads from Postgres, run as part of the Gold build
+job, separate from the CDC/streaming path entirely.
+
+**Alternatives considered:** Adding these tables to the existing
+Debezium connectors - rejected as unnecessary CDC overhead for data
+that changes on the order of days/weeks, not seconds.
+
+**Consequences:** Two distinct load patterns coexist by design:
+streaming CDC for high-change transactional data, batch JDBC for
+low-change reference data. This mirrors real enterprise practice, where
+not every table justifies real-time capture.
