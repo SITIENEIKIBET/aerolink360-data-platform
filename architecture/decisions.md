@@ -251,3 +251,30 @@ config changes (e.g. adding a port mapping) is now safe going forward -
 this is the same lesson Postgres already had baked in from Phase 2, and
 should have been applied to every stateful service from the start, not
 just databases.
+
+
+## ADR-011: Always Verify Delta Tables via Delta-Aware Reads, Not Raw File Globbing
+
+**Context:** A verification check using `glob.glob('*.parquet')` +
+`pd.concat` showed double the expected row counts for silver_flights
+(1440 vs 720) and silver_aircraft (50 vs 25), while the pipeline's own
+`.count()` log output showed the correct numbers.
+
+**Root cause:** Glob-based file reading is unaware of Delta Lake's
+transaction log. `mode("overwrite")` logically replaces data (the
+transaction log correctly references only current files), but does not
+necessarily immediately physically delete superseded Parquet files -
+especially when a write task was internally retried (plausible here,
+given concurrent MemoryManager heap-pressure warnings during these
+specific runs). A naive file glob picks up stale files the transaction
+log has already logically excluded.
+
+**Decision:** All Delta table verification must go through
+`spark.read.format("delta").load(path)`, never direct Parquet file
+globbing, since only the Delta-aware read correctly consults the
+transaction log to determine which files are actually current.
+
+**Consequences:** This is now the standard verification pattern for the
+rest of this project. It's also a directly relevant answer to "why does
+Delta Lake matter over plain Parquet" - this ADR is live proof, not a
+theoretical answer.
